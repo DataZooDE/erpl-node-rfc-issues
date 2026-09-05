@@ -1,0 +1,42 @@
+erpl-node-rfc
+Copyright (c) DataZoo GmbH
+
+This product is licensed under the Business Source License 1.1 (BUSL-1.1).
+See the LICENSE file.
+
+--------------------------------------------------------------------------
+Portions adapted from SAP's node-rfc
+--------------------------------------------------------------------------
+
+The TypeScript layer in src/ts/ and the test suite in test/ are adapted from:
+
+    https://github.com/SAP-archive/node-rfc
+    src/ts/*.ts and test/**
+    Copyright (c) 2014 SAP SE, Srdjan Boskovic <srdjan.boskovic@sap.com>
+    Licensed under the Apache License, Version 2.0
+
+A copy of the Apache License, Version 2.0 is available at:
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+The adapted code is the binding's public API -- the classes, the type
+definitions, the promise and callback duality, and the error shapes -- together
+with the suite that tests them. It carries no knowledge of the RFC wire
+protocol. erpl-proto's implementation of that protocol is clean-room, derived
+solely from this project's own captures of libsapnwrfc, and nothing in the
+adapted code informs it.
+
+Two files depart from the reference and say so in their own comments:
+src/ts/noderfc-bindings.ts, which loads a napi-rs addon rather than an SDK, and
+test/utils/abapSystem.ts, which reads the system from the environment rather
+than from an sapnwrfc.ini nobody outside SAP has.
+
+SAP and the SAP logo are trademarks of SAP SE. This project is not affiliated
+with, endorsed by, or sponsored by SAP.
+
+--------------------------------------------------------------------------
+Status
+--------------------------------------------------------------------------
+
+This binding is in progress. The ladder of adapted specs, and where it stands,
+is recorded in CHANGELOG.md.
