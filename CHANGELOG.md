@@ -3,6 +3,44 @@
 All notable changes to `erpl-node-rfc`. Calendar versioning, `YYYY.M.D` — npm
 takes it without complaint, unlike Go modules.
 
+## 2026.11.19
+
+Release gate run on 2026-11-19 against the a4h ABAP Platform Trial (release 816,
+kernel 9.16):
+- **`examples/run_both.sh`:** no differences across 351 lines against SAP's
+  node-rfc 3.3.1.
+- **jest:** 93 of 117 adapted specs pass live, and every remaining failure is
+  attributed: 15 need ABAP a4h does not have (`ES_OUTPUT` fixtures,
+  `EAM_TASKLIST_GET_DETAIL`); 2 assert the reference's own system's content (E3,
+  X); 2 are the known metadata round-trip gap in the throughput spec (87 calls
+  for `BAPI_USER_GET_DETAIL`); 1 (`Getters`) asserts that `open()` has not
+  finished, which is timing; 4 skip.
+- **`cargo test --release`:** green.
+
+### Fixed
+
+- **Any instance number other than 00 was routed to instance 00.** The
+  connection handshake announced `localhost`/`sapdp00` whatever `ashost` and
+  `sysnr` were given, and the gateway routes to what the client announces: a
+  system on instance 50 answered `partner ... not reached`. The handshake now
+  matches SAP's library byte for byte. A gateway refusal is reported as
+  `RFC_COMMUNICATION_FAILURE` with the gateway's text, and a `sysnr` that is
+  not two digits is refused as `RFC_INVALID_PARAMETER`, as SAP's library refuses
+  it. (Shared with erpl-pyrfc 2026.11.19, erpl-pyrfc-issues#3.)
+- **An exception reported a message nobody raised.** Every call asked the ABAP
+  dictionary about each parameter's type, scalars included. For a `STRING` that
+  lookup fails, which cost a round trip on every call and left a `DO`/`410`
+  message in the ABAP session for the next exception to carry. Every
+  `RFC_RAISE_ERROR` method that raises without a `MESSAGE` then reported a T100
+  SAP's node-rfc never shows. Only structured parameters are described now, and
+  connections share one metadata cache per process, as SAP's node-rfc does. That
+  cache is keyed by function name, so one process talking to two systems whose
+  interfaces differ shares one system's descriptions.
+- **A message of a type ABAP does not have** (`RFC_RAISE_ERROR MESSAGETYPE=0`)
+  is a short dump with no T100 identity, as in SAP's library.
+- **A basXML table had the wrong row width** when its row type ends short of its
+  alignment: 734 bytes instead of the 736 the classic encoding gives.
+
 ## 2026.9.8
 
 Metadata only. The description now names the siblings -- `erpl-pyrfc` on PyPI
