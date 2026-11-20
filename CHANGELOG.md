@@ -3,6 +3,38 @@
 All notable changes to `erpl-node-rfc`. Calendar versioning, `YYYY.M.D` — npm
 takes it without complaint, unlike Go modules.
 
+## 2026.11.20
+
+Release gate run on 2026-11-20 against the a4h ABAP Platform Trial (release 816,
+kernel 9.16):
+- **`examples/run_both.sh`:** no differences across 351 lines against SAP's
+  node-rfc 3.3.1.
+- **jest:** 93 of 117 adapted specs pass live, unchanged from 2026.11.19, with
+  the same attribution for the rest: 15 need ABAP a4h does not have
+  (`ES_OUTPUT` fixtures, `EAM_TASKLIST_GET_DETAIL`); 2 assert the reference's
+  own system's content (E3, X); 2 are the metadata round-trip gap in the
+  throughput spec; 1 (`Getters`) is timing; 4 skip.
+- **`cargo test --release`:** green. A bare `node:20-bookworm` container
+  installs the main and `linux-x64-gnu` tarballs and loads the addon.
+
+### Fixed
+
+- **A short NUMC value reached ABAP as a different number.** NUMC was padded
+  with blanks like CHAR, so `"0"` for a NUMC 5 went out as `"0    "`. It is now
+  right-aligned and zero-padded (`"00000"`), as SAP's library does; a value
+  wider than the field or text that is not digits is refused. (Shared with
+  erpl-pyrfc 2026.11.20.)
+- **Two systems in one process could share each other's metadata.** The
+  caveat recorded for 2026.11.19 is gone: function descriptions are cached once
+  per system (host and instance, or port, or wsRFC host), not once per process,
+  so one system's layout is no longer used for another's function.
+- **An ABAP callback (`DESTINATION 'BACK'`) was read as the reply.** The call
+  then "succeeded" with no outputs and left the connection out of step with the
+  server. This binding has no callback API, so the call now fails as SAP's
+  library fails it: `RfcLibError`, `RFC_NOT_FOUND` (17), "Function <name> not
+  found". As with SAP's library, that ends the conversation, and the call with
+  it, rather than leaving it waiting for an answer.
+
 ## 2026.11.19
 
 Release gate run on 2026-11-19 against the a4h ABAP Platform Trial (release 816,
