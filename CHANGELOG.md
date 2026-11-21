@@ -3,6 +3,45 @@
 All notable changes to `erpl-node-rfc`. Calendar versioning, `YYYY.M.D` — npm
 takes it without complaint, unlike Go modules.
 
+## 2026.11.21
+
+Release gate run on 2026-11-21 against the a4h ABAP Platform Trial (release 816,
+kernel 9.16):
+- **`examples/run_both.sh`:** no differences across 435 lines against SAP's
+  node-rfc 3.3.1, now including `notRequested` and the logon-without-credentials
+  cases.
+- **jest:** 93 of 117 adapted specs pass live, with the same 20 failures as
+  2026.11.20 and the same attribution; 4 skip.
+- **`cargo test --release`:** green. A bare `node:20-bookworm` container
+  installs the main and `linux-x64-gnu` tarballs and loads the addon.
+
+### Added
+
+- **The `notRequested` call option works.** It was silently ignored, so every
+  output was requested and ABAP saw `IS REQUESTED` true for all of them, and
+  a module could answer differently from how it answers SAP's node-rfc.
+  Behaviour now matches SAP's node-rfc, measured with `examples/run_both.sh`:
+  - an export it names is not requested, and reads as its initial value;
+  - a table or a structure it names is neither sent nor requested, even when
+    passed, and a table comes back as the rows that were passed;
+  - a supplied import or `CHANGING` scalar is unaffected;
+  - names match exactly, and an array item that is not a string is skipped;
+  - anything but an array, `null` included, rejects with
+    `Error: Invalid argument`.
+
+  (erpl-proto#84.)
+
+### Fixed
+
+- **A logon with no user or no password was reported as
+  `RFC_COMMUNICATION_FAILURE`, "RFC_PRO field at offset 0 is truncated"**
+  (erpl-proto#85). It is now `RfcLibError`, code 6, `RFC_CLOSED`, group 4,
+  with exactly SAP's node-rfc message: "00024error during logon", then the
+  record's padding as `\u0080` characters.
+- **A structure field left out of an object reached ABAP as blanks.** A DATE,
+  TIME or NUMC field is now sent as zeros, its ABAP initial value, as SAP's
+  library sends it. So is a DATE or TIME passed as `""`.
+
 ## 2026.11.20
 
 Release gate run on 2026-11-20 against the a4h ABAP Platform Trial (release 816,

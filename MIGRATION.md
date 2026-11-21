@@ -8,6 +8,7 @@ differs.
 | node-rfc surface | Status |
 |---|---|
 | `Client`: `open`, `close`, `ping`, `call`, `invoke`, `connect`, `cancel` | works |
+| Call options `timeout` and `notRequested` | works; `notRequested` as below |
 | `client.alive`, `id`, `connectionHandle`, `config`, `connectionInfo` | works |
 | `client.RStrip` / client options | works |
 | Promise and callback forms of every method | works |
@@ -20,6 +21,17 @@ differs.
 
 Type mapping is unchanged: `string`, `number`, `Buffer`, `Decimal`, `Date`,
 objects for structures and arrays for tables.
+
+**`notRequested` behaves as in SAP's node-rfc**, measured with
+`examples/run_both.sh` (spec PRO-8a):
+- An export it names is not requested, so ABAP sees `IS REQUESTED` false, and
+  it comes back as its initial value.
+- **A table or structure it names is not sent either, even when you pass it.**
+  A table comes back as the rows you passed.
+- A scalar import or `CHANGING` parameter you pass is unaffected.
+- Names match exactly. An array item that is not a string is skipped.
+- Anything but an array, `null` and an explicit `undefined` included, rejects
+  with `Error: Invalid argument`.
 
 ## The one gap
 
