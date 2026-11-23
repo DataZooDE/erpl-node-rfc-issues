@@ -67,3 +67,14 @@ hidden.
 No SAP NW RFC SDK. No ICU. No `SAPNWRFC_HOME`, no `LD_LIBRARY_PATH`, no
 node-gyp, no Python toolchain, no Visual C++ redistributable. `npm install` and
 `require` — that is all.
+
+## Throughput counts fewer metadata calls
+
+`Throughput.status.numberOfCalls` counts metadata lookups as calls, as SAP's
+node-rfc does, but erpl-node-rfc makes fewer of them: nested structure types are
+cached per system, so a call with many structures costs less the first time.
+Measured on one system for `BAPI_USER_GET_DETAIL`: SAP's node-rfc 102 calls,
+erpl-node-rfc 45, with identical results. A monitor that alerts on an exact call
+count for a given function should expect lower numbers; simple calls such as
+`STFC_CONNECTION` cost the same (2 the first time, 1 after).
+

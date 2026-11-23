@@ -3,6 +3,31 @@
 All notable changes to `erpl-node-rfc`. Calendar versioning, `YYYY.M.D` — npm
 takes it without complaint, unlike Go modules.
 
+## 2026.11.23
+
+Release gate run on 2026-11-23 against the a4h ABAP Platform Trial (release 816,
+kernel 9.16):
+- **`examples/run_both.sh`:** no differences across 435 lines against SAP's
+  node-rfc 3.3.1.
+- **jest:** 95 of 117 adapted specs pass live (93 in 2026.11.21); 4 skip. Of the
+  18 failures, 15 need ABAP a4h does not have, 1 asserts the reference's own
+  system (`AbapRuntimeError X`), 1 (`Getters`) is timing, and 1 is the
+  throughput spec counting a call whose metadata an earlier spec in the same
+  worker had already cached -- run alone, all 9 throughput specs pass.
+- **`cargo test --release`:** 9/9. A bare `node:20-bookworm` container installs
+  the main and `linux-x64-gnu` tarballs and loads the addon.
+
+### Changed
+
+- **The shim is faster under parallel reads and on text.** Table cell reads
+  share the registry lock instead of queueing on one exclusive lock, and text is
+  converted to UTF-8 without allocating, with ASCII copied in one pass. On
+  erpl's 297,000-row DD04T read through the same shim, measured in one run,
+  it now takes 6.4 s against SAP's library's 7.0 s (erpl-proto #99, #102).
+- The throughput spec asserts bounds instead of SAP's system's exact metadata
+  call count; this library makes as many metadata calls as the reference or
+  fewer (erpl-proto #97).
+
 ## 2026.11.21
 
 Release gate run on 2026-11-21 against the a4h ABAP Platform Trial (release 816,
