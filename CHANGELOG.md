@@ -3,6 +3,26 @@
 All notable changes to `erpl-node-rfc`. Calendar versioning, `YYYY.M.D` — npm
 takes it without complaint, unlike Go modules.
 
+## 2026.11.25
+
+Release gate run on 2026-11-25 against the a4h ABAP Platform Trial (release 816,
+kernel 9.16):
+- **`examples/run_both.sh`:** no differences across 435 lines against SAP's
+  node-rfc 3.3.1.
+- **jest:** 95 of 117 adapted specs pass live; 4 skip. The 18 failures are the
+  same specs as in 2026.11.23, for the reasons given there.
+- **cargo:** 9 passed, none failed.
+
+### Faster
+
+- **Large replies use less memory and fewer instructions.** A large reply is
+  now mapped by the library itself and unmapped when it is dropped, so freeing it
+  no longer lets glibc raise its mmap threshold and fragment the host's heap; the
+  host's allocator settings are untouched (Linux glibc; musl, macOS and Windows
+  keep the plain buffer). Decompression copies back-references in bulk. On erpl's
+  297,000-row DD04T read through the same core, peak memory is 40-50% lower and
+  instructions 37% fewer than in the previous release (erpl-proto #107).
+
 ## 2026.11.23
 
 Release gate run on 2026-11-23 against the a4h ABAP Platform Trial (release 816,
